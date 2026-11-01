@@ -12,39 +12,44 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Tipado:** No usar jamás `any`. Si un tipo es desconocido, usar `unknown` o definir la interfaz en `src/types/index.ts` primero.
 - **Tailwind:** Mantener las clases en orden lógico (Layout -> Spacing -> Typography -> Colors).
 
+## Debugging y Errores 
+- Antes de intentar arreglar un error de red, verifica siempre si la `VITE_OMDB_API_KEY` está cargada en el contexto.
+ Si hay un error de tipos, revisar primero `src/types/index.ts` antes de crear nuevos archivos de tipos.
+
 ## Comandos
 
 ```bash
 npm run dev       # servidor de desarrollo (Vite)
 npm run build     # type-check (tsc -b) + build de producción
 npm run lint      # ESLint sobre todo el repo
+npm tsc --noEmit  # Ejecuta ESLint sobre src/
 npm run preview   # sirve el build de producción localmente
 ```
 
 No hay configurado un test runner todavía (no hay `test` script ni librería de testing instalada).
+## Herramientas de Documentación (MCP)
+- **Context7**: Utiliza siempre `query-docs` para verificar sintaxis de librerías externas (React, Tailwinds CSS v4, OMDB API) antes de proponer cambios en el código.  No asumas conocimientos previos si la librería tiene documentación  disponible en este MCP.
 
-### Variable de entorno requerida
+## Environment
 
-La app llama directamente a la API de OMDb desde el cliente y necesita una API key:
-
-```bash
-cp .env.example .env
-# editar .env y setear VITE_OMDB_API_KEY=<tu key>
+Requiere un archivo `.env`en la raíz con:
+```
+VITE_OMDB_API_KEY=tu_api_key_aqui
 ```
 
-Sin esa variable, `src/lib/omdb.ts` lanza un error explícito (`assertApiKey`) antes de hacer cualquier request.
+La API key se obtiene gratis en [omdbapi.com](https://www.omdbapi.com/apikey.aspx).  Sin ella, todas las búsquedas fallan silenciosamente (devulven array vacío).
 
 ## Arquitectura
 
 Esta es la app "Buscador de Películas Agéntico" descrita en `SPEC.md`: una app tipo note-taking enfocada en películas — buscar en OMDb, ver detalle, y llevar una Watchlist personal con notas en rich text (TipTap) por película.
 
-**Estado actual del código**: solo está implementado el flujo de búsqueda (`App.tsx` → `SearchBar` → `useMovieSearch` → `lib/omdb.ts` → `MovieGrid`/`MovieCard`). Las carpetas `src/features/movie-detail/`, `src/features/notes/`, `src/features/watchlist/` y `src/hooks/` existen pero están vacías — son el espacio reservado para el resto de la funcionalidad descrita en `SPEC.md` (detalle de película, gestión de notas enriquecidas, y compartir la watchlist).
+**Estado actual del código**: solo está implementado el flujo de búsqueda (`App.tsx` → `SearchBar` → `useMovieSearch` → `service/omdb.ts` → `MovieGrid`/`MovieCard`). Las carpetas `src/features/movie-detail/`, `src/features/notes/`, `src/features/watchlist/` y `src/hooks/` existen pero están vacías — son el espacio reservado para el resto de la funcionalidad descrita en `SPEC.md` (detalle de película, gestión de notas enriquecidas, y compartir la watchlist).
 
-**Organización por features**: el código de dominio vive bajo `src/features/<nombre>/` (hook de estado + componentes de esa feature juntos, ver `src/features/search/`), mientras que `src/components/` contiene componentes de presentación reutilizables entre features (`MovieCard`, `MovieGrid`). `src/lib/` contiene clientes de APIs externas sin estado de React (`omdb.ts`). `src/types/` contiene los tipos de dominio compartidos (`movie.ts`).
+**Organización por features**: el código de dominio vive bajo `src/features/<nombre>/` (hook de estado + componentes de esa feature juntos, ver `src/features/search/`), mientras que `src/components/` contiene componentes de presentación reutilizables entre features (`MovieCard`, `MovieGrid`). `src/service/` contiene clientes de APIs externas sin estado de React (`omdb.ts`). `src/types/index.ts` contiene los tipos de dominio compartidos.
 
-**Patrón por feature**: un hook custom (`useMovieSearch`) encapsula el estado y las llamadas a `lib/`, y expone un objeto de estado + funciones; el componente (`SearchBar`) es controlado y solo dispara callbacks (`onSearch`). `App.tsx` conecta el hook de la feature con los componentes de presentación.
+**Patrón por feature**: un hook custom (`useMovieSearch`) encapsula el estado y las llamadas a `service/`, y expone un objeto de estado + funciones; el componente (`SearchBar`) es controlado y solo dispara callbacks (`onSearch`). `App.tsx` conecta el hook de la feature con los componentes de presentación.
 
-**Cliente OMDb** (`src/lib/omdb.ts`): expone `searchMovies(title, page)` y `getMovieById(imdbID)`. La API de OMDb devuelve `Response: 'True' | 'False'` con un campo `Error` en vez de status HTTP de error; el cliente normaliza esto lanzando excepciones (excepto el caso "Movie not found!" en búsquedas, que se trata como resultado vacío, no como error).
+**Cliente OMDb** (`src/service/omdb.ts`): expone `searchMovies(title, page)` y `getMovieById(imdbID)`. La API de OMDb devuelve `Response: 'True' | 'False'` con un campo `Error` en vez de status HTTP de error; el cliente normaliza esto lanzando excepciones (excepto el caso "Movie not found!" en búsquedas, que se trata como resultado vacío, no como error).
 
 **Persistencia (planeada, aún no implementada)**: según `SPEC.md`, la Watchlist y las notas se persistirán en SQLite con SQL puro (no hay ORM ni cliente SQLite instalado todavía).
 

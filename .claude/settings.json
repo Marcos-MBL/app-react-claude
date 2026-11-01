@@ -1,0 +1,15 @@
+{
+    "hooks": {
+        "PostToolUse": [
+            {
+                "matcher": "write_to_file|edit_file",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node -e \"try { const d = JSON.parse(require('fs').readFileSync(0, 'utf8')); const p = d.tool_input?.path || d.tool_input?.file_path || ''; console.log('🔍 Archivo:', p); if (/src[\\\\/]+components/i.test(p)) { console.log('✅ Validando arquitectura moderna en el componente...'); } } catch(e) {}\""  
+                    }
+                ]
+            }
+        ]
+    }
+}

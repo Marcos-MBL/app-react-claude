@@ -8,6 +8,9 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Carga sql.js como global `window.initSqlJs`: el paquete npm está empaquetado
+         como UMD/emscripten y Vite no lo interopera bien como import ESM. -->
+    <script src="https://sql.js.org/dist/sql-wasm.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

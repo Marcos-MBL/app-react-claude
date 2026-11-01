@@ -1,44 +1,42 @@
+import { useState } from 'react'
+import { Layout } from './components/Layout'
+import { MovieDetail } from './components/MovieDetail'
 import { MovieGrid } from './components/MovieGrid'
-import { SearchBar } from './features/search/SearchBar'
-import { useMovieSearch } from './features/search/useMovieSearch'
+import { SearchBar } from './components/SearchBar'
+import { useMovies } from './hooks/useMovies'
 
-function App() {
-  const { query, results, totalResults, loading, error, hasSearched, search } =
-    useMovieSearch()
+const App = () => {
+  const { movies, error, hasSearched, searchAction } = useMovies()
+  const [selectedImdbID, setSelectedImdbID] = useState<string | null>(null)
+
+  if (selectedImdbID) {
+    return (
+      <Layout>
+        <MovieDetail imdbID={selectedImdbID} onBack={() => setSelectedImdbID(null)} />
+      </Layout>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100">
-      <header className="border-b border-gray-200 dark:border-gray-800">
-        <div className="mx-auto max-w-5xl px-4 py-6">
-          <h1 className="text-2xl font-semibold">Buscador de Películas</h1>
-        </div>
-      </header>
+    <Layout>
+      <SearchBar action={searchAction} />
 
-      <main className="mx-auto max-w-5xl px-4 py-8">
-        <SearchBar onSearch={search} loading={loading} />
+      <div className="mt-6">
+        {error && (
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        )}
 
-        <div className="mt-6">
-          {error && (
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-          )}
+        {!error && movies.length > 0 && (
+          <MovieGrid movies={movies} onSelect={(movie) => setSelectedImdbID(movie.imdbID)} />
+        )}
 
-          {!error && hasSearched && !loading && results.length === 0 && (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              No se encontraron resultados para «{query}».
-            </p>
-          )}
-
-          {!error && results.length > 0 && (
-            <>
-              <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-                {totalResults} resultado{totalResults === 1 ? '' : 's'} para «{query}»
-              </p>
-              <MovieGrid movies={results} />
-            </>
-          )}
-        </div>
-      </main>
-    </div>
+        {!error && hasSearched && movies.length === 0 && (
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            No se encontraron películas para esa búsqueda.
+          </p>
+        )}
+      </div>
+    </Layout>
   )
 }
 

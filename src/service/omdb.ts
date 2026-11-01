@@ -1,4 +1,4 @@
-import type { MovieDetail, MovieSearchResult } from '../types/movie'
+import type { MovieDetail, MovieSearchResult } from '../types'
 
 const BASE_URL = 'https://www.omdbapi.com/'
 const API_KEY = import.meta.env.VITE_OMDB_API_KEY
@@ -18,7 +18,7 @@ interface OmdbDetailResponse extends Partial<MovieDetail> {
 function assertApiKey() {
   if (!API_KEY) {
     throw new Error(
-      'Falta VITE_OMDB_API_KEY. Copia .env.example a .env y añade tu API key de OMDb.',
+      'Falta VITE_OMDB_API_KEY. Crea un archivo .env en la raíz del proyecto con tu API key de OMDb.',
     )
   }
 }

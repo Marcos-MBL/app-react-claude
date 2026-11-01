@@ -34,3 +34,27 @@ export interface MovieDetail {
   Type: string
   BoxOffice: string
 }
+
+export type NoteImportance = 'low' | 'medium' | 'high'
+
+/**
+ * Nota enriquecida de una película, persistida como columna TEXT en SQLite.
+ * `content` guarda el documento JSON de TipTap (`editor.getJSON()`); se tipa
+ * como `unknown` porque su forma es recursiva y se valida al montar el editor.
+ */
+export interface MovieNote {
+  id: string
+  imdbID: string
+  content: unknown
+  importance: NoteImportance
+  createdAt: string
+  updatedAt: string
+}
+
+export interface WatchlistItem {
+  imdbID: string
+  title: string
+  poster: string
+  addedAt: string
+  watched: boolean
+}
