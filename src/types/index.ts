@@ -51,6 +51,8 @@ export interface MovieNote {
   updatedAt: string
 }
 
+export type Theme = 'light' | 'dark'
+
 export interface WatchlistItem {
   imdbID: string
   title: string

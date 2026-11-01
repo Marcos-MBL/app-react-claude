@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Toaster } from 'react-hot-toast'
+import { ThemeToggle } from './ThemeToggle'
 
 interface LayoutProps {
   children: ReactNode
@@ -15,8 +16,9 @@ export const Layout = ({ children }: LayoutProps) => {
       <Toaster position="top-right" />
 
       <header className="border-b border-gray-200 dark:border-gray-800">
-        <div className="mx-auto max-w-5xl px-4 py-6">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-6">
           <h1 className="text-2xl font-semibold">Buscador de Películas</h1>
+          <ThemeToggle />
         </div>
       </header>
 
